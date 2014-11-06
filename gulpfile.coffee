@@ -155,8 +155,8 @@ gulp.task "sass-compile", ["sass-lint"], ->
         .pipe(gulp.dest(paths.tmpStyles))
 
 csslintChannel = lazypipe()
-  .pipe(csslint, "csslintrc.json")
-  .pipe(csslint.reporter)
+    .pipe(csslint, "csslintrc.json")
+    .pipe(csslint.reporter)
 
 gulp.task "css-lint-app", ->
     gulp.src(mainSass.concat([paths.tmpStylesExtras]))

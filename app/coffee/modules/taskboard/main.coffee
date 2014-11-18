@@ -102,7 +102,6 @@ class TaskboardController extends mixOf(taiga.Controller, taiga.PageMixin)
     loadProject: ->
         return @rs.projects.get(@scope.projectId).then (project) =>
             @scope.project = project
-            @scope.$emit('project:loaded', project)
             # Not used at this momment
             @scope.pointsList = _.sortBy(project.points, "order")
             # @scope.roleList = _.sortBy(project.roles, "order")
@@ -111,6 +110,9 @@ class TaskboardController extends mixOf(taiga.Controller, taiga.PageMixin)
             @scope.taskStatusList = _.sortBy(project.task_statuses, "order")
             @scope.usStatusList = _.sortBy(project.us_statuses, "order")
             @scope.usStatusById = groupBy(project.us_statuses, (e) -> e.id)
+
+            @scope.$emit('project:loaded', project)
+
             return project
 
     loadSprintStats: ->
@@ -267,22 +269,6 @@ TaskboardTaskDirective = ($rootscope) ->
 
 module.directive("tgTaskboardTask", ["$rootScope", TaskboardTaskDirective])
 
-
-#############################################################################
-## Taskboard Task Row Size Fixer Directive
-#############################################################################
-
-TaskboardRowWidthFixerDirective = ->
-    link = ($scope, $el, $attrs) ->
-        bindOnce $scope, "taskStatusList", (statuses) ->
-            itemSize = 300 + (10 * statuses.length)
-            size = (1 + statuses.length) * itemSize
-            $el.css("width", "#{size}px")
-
-    return {link: link}
-
-module.directive("tgTaskboardRowWidthFixer", TaskboardRowWidthFixerDirective)
-
 #############################################################################
 ## Taskboard Table Height Fixer Directive
 #############################################################################
@@ -307,6 +293,51 @@ TaskboardTableHeightFixerDirective = ->
 
 module.directive("tgTaskboardTableHeightFixer", TaskboardTableHeightFixerDirective)
 
+#############################################################################
+## Taskboard Squish Column Directive
+#############################################################################
+
+TaskboardSquishColumnDirective = (rs) ->
+    columWidth = 310
+    columWidthFolded = 55
+
+    link = ($scope, $el, $attrs) ->
+        $scope.$on "project:loaded", (event, project) ->
+            $scope.statusesFolded = rs.tasks.getStatusColumnModes(project.id)
+            $scope.usFolded = rs.tasks.getUsRowModes(project.id)
+
+            updateTableWidth()
+
+        $scope.foldStatus = (status) ->
+            $scope.statusesFolded[status.id] = !!!$scope.statusesFolded[status.id]
+            rs.tasks.storeStatusColumnModes($scope.projectId, $scope.statusesFolded)
+            updateTableWidth()
+            return
+
+        $scope.foldUs = (us) ->
+            if !us
+                $scope.usFolded["unassigned"] = !!!$scope.usFolded["unassigned"]
+            else
+                $scope.usFolded[us.id] = !!!$scope.usFolded[us.id]
+
+            rs.tasks.storeUsRowModes($scope.projectId, $scope.usFolded)
+            return
+
+        updateTableWidth = ->
+            columnWidths = _.map $scope.taskStatusList, (status) ->
+                if $scope.statusesFolded[status.id]
+                    return columWidthFolded
+                else
+                    return columWidth
+
+            totalWidth = _.reduce columnWidths, (total, width) ->
+                return total + width
+
+            $el.find('.taskboard-table-inner').css("width", totalWidth + columWidth)
+
+    return {link: link}
+
+module.directive("tgTaskboardSquishColumn", ["$tgResources", TaskboardSquishColumnDirective])
 
 #############################################################################
 ## Taskboard User Directive

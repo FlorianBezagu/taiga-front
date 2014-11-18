@@ -2,10 +2,9 @@
 
 $column-width: 300px;
 $column-folded-width: 45px;
-$column-flex: 1;
+$column-flex: 0;
 $column-shrink: 0;
 $column-margin: 0 10px 0 0;
-
 
 .taskboard-table {
     overflow: hidden;
@@ -22,7 +21,7 @@ $column-margin: 0 10px 0 0;
         position: absolute;
     }
     .task-colum-name {
-        @include table-flex-child();
+        @include table-flex-child($column-flex, $column-width, $column-shrink, $column-width);
         @include table-flex();
         @include justify-content(space-between);
         @extend %large;
@@ -38,15 +37,6 @@ $column-margin: 0 10px 0 0;
         &:last-child {
             margin-right: 0;
         }
-        &:hover {
-            .icon {
-                &.hfold,
-                &.hunfold {
-                    @include transition(opacity .2s linear);
-                    opacity: 1;
-                }
-            }
-        }
         .icon {
             @extend %medium;
             @include transition(color .2s linear);
@@ -57,10 +47,8 @@ $column-margin: 0 10px 0 0;
             }
             &.hfold,
             &.hunfold {
-                @include transition(opacity .2s linear);
                 @include transform(rotate(90deg));
                 display: inline-block;
-                opacity: 0;
             }
         }
         &.column-fold {
@@ -88,14 +76,14 @@ $column-margin: 0 10px 0 0;
     overflow-y: scroll;
     width: 100%;
     .task-column {
-        @include table-flex-child();
+        @include table-flex-child($column-flex, $column-width, $column-shrink, $column-width);
         margin: $column-margin;
         max-width: $column-width;
         width: $column-width;
         &:last-child {
             margin-right: 0;
         }
-        &.colum-fold {
+        &.column-fold {
             max-width: $column-folded-width;
             width: $column-folded-width;
             .taskboard-task {
@@ -213,7 +201,8 @@ $column-margin: 0 10px 0 0;
             &.icon-plus {
                 right: 2rem;
             }
-            &.icon-vfold {
+            &.icon-vfold,
+            &.icon-vunfold {
                 left: 0;
                 right: inherit;
             }

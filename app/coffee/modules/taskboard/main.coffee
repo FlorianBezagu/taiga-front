@@ -302,9 +302,9 @@ TaskboardSquishColumnDirective = (rs) ->
     columWidthFolded = 55
 
     link = ($scope, $el, $attrs) ->
-        $scope.$on "project:loaded", (event, project) ->
-            $scope.statusesFolded = rs.tasks.getStatusColumnModes(project.id)
-            $scope.usFolded = rs.tasks.getUsRowModes(project.id)
+        bindOnce $scope, "usTasks", (project) ->
+            $scope.statusesFolded = rs.tasks.getStatusColumnModes($scope.project.id)
+            $scope.usFolded = rs.tasks.getUsRowModes($scope.project.id)
 
             updateTableWidth()
 
@@ -321,9 +321,37 @@ TaskboardSquishColumnDirective = (rs) ->
                 $scope.usFolded[us.id] = !!!$scope.usFolded[us.id]
 
             rs.tasks.storeUsRowModes($scope.projectId, $scope.usFolded)
+            updateTableWidth()
             return
 
         updateTableWidth = ->
+            columnWidths = []
+
+            _.forEach $scope.taskStatusList, (status) ->
+                statusFolded = false
+
+                _.forEach $scope.userstories, (us) ->
+                    if $scope.statusesFolded[status.id] && $scope.usFolded[us.id]
+                        tasks = $scope.usTasks[us.id][status.id].length
+
+                        if tasks > 1
+                            tasksMatrixSize = Math.round(Math.sqrt(tasks))
+                            width = 40 * tasksMatrixSize
+
+                            statusFolded = true
+
+                            $(".status-#{status.id}").css({
+                                'width': width,
+                                'min-width': width
+                            })
+
+                if !statusFolded && $scope.statusesFolded[status.id]
+                    $(".status-#{status.id}").css({
+                        'width': 40,
+                        'min-width': 40
+                    })
+
+
             columnWidths = _.map $scope.taskStatusList, (status) ->
                 if $scope.statusesFolded[status.id]
                     return columWidthFolded
@@ -333,7 +361,8 @@ TaskboardSquishColumnDirective = (rs) ->
             totalWidth = _.reduce columnWidths, (total, width) ->
                 return total + width
 
-            $el.find('.taskboard-table-inner').css("width", totalWidth + columWidth)
+            #$el.find('.taskboard-table-inner').css("width", totalWidth + columWidth)
+            $el.find('.taskboard-table-inner').css("width", 2000)
 
     return {link: link}
 

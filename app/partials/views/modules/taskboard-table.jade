@@ -2,7 +2,7 @@ div.taskboard-table(tg-taskboard-squish-column)
     div.taskboard-table-header
         div.taskboard-table-inner
             h2.task-colum-name "User story"
-            h2.task-colum-name(ng-repeat="s in taskStatusList track by s.id", ng-style="{'border-top-color':s.color}", ng-class="{'column-fold':statusesFolded[s.id]}", tg-bo-title="s.name")
+            h2.task-colum-name(ng-repeat="s in taskStatusList track by s.id", ng-style="{'border-top-color':s.color}", ng-class="{'column-fold':statusesFolded[s.id]}", class="status-{{s.id}}", tg-bo-title="s.name")
                 span(tg-bo-bind="s.name")
                 a.icon.icon-vfold.hfold(href="", ng-click='foldStatus(s)', title="Fold Column", ng-class='{hidden:statusesFolded[s.id]}')
                 a.icon.icon-vunfold.hunfold(href="", title="Unfold Column", ng-click='foldStatus(s)', ng-class='{hidden:!statusesFolded[s.id]}')
@@ -22,7 +22,7 @@ div.taskboard-table(tg-taskboard-squish-column)
                         span(ng-bind="us.total_points")
                         span points
                     include ../components/addnewtask
-                div.taskboard-tasks-box.task-column(ng-repeat="st in taskStatusList track by st.id", tg-taskboard-sortable, ng-class="{'column-fold':statusesFolded[st.id]}")
+                div.taskboard-tasks-box.task-column(ng-repeat="st in taskStatusList track by st.id", tg-taskboard-sortable, class="status-{{st.id}}", ng-class="{'column-fold':statusesFolded[st.id]}")
                         div.taskboard-task(ng-repeat="task in usTasks[us.id][st.id] track by task.id",
                                            tg-taskboard-task)
                             include ../components/taskboard-task

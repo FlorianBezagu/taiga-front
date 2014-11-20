@@ -298,9 +298,6 @@ module.directive("tgTaskboardTableHeightFixer", TaskboardTableHeightFixerDirecti
 #############################################################################
 
 TaskboardSquishColumnDirective = (rs) ->
-    columWidth = 310
-    columWidthFolded = 55
-
     link = ($scope, $el, $attrs) ->
         bindOnce $scope, "usTasks", (project) ->
             $scope.statusesFolded = rs.tasks.getStatusColumnModes($scope.project.id)
@@ -312,7 +309,6 @@ TaskboardSquishColumnDirective = (rs) ->
             $scope.statusesFolded[status.id] = !!!$scope.statusesFolded[status.id]
             rs.tasks.storeStatusColumnModes($scope.projectId, $scope.statusesFolded)
             updateTableWidth()
-            return
 
         $scope.foldUs = (us) ->
             if !us
@@ -322,7 +318,6 @@ TaskboardSquishColumnDirective = (rs) ->
 
             rs.tasks.storeUsRowModes($scope.projectId, $scope.usFolded)
             updateTableWidth()
-            return
 
         updateTableWidth = ->
             columnWidths = []
@@ -331,38 +326,29 @@ TaskboardSquishColumnDirective = (rs) ->
                 statusFolded = false
 
                 _.forEach $scope.userstories, (us) ->
-                    if $scope.statusesFolded[status.id] && $scope.usFolded[us.id]
-                        tasks = $scope.usTasks[us.id][status.id].length
+                    tasks = $scope.usTasks[us.id][status.id].length
 
-                        if tasks > 1
-                            tasksMatrixSize = Math.round(Math.sqrt(tasks))
-                            width = 40 * tasksMatrixSize
+                    if $scope.statusesFolded[status.id] && tasks > 1
+                        statusFolded = true
+                        tasksMatrixSize = Math.round(Math.sqrt(tasks))
+                        width = 40 * tasksMatrixSize
 
-                            statusFolded = true
+                        $el.find(".status-#{status.id}").css({
+                            'max-width': width
+                        })
 
-                            $(".status-#{status.id}").css({
-                                'width': width,
-                                'min-width': width
-                            })
+                if !statusFolded
+                    $el.find(".status-#{status.id}").removeAttr("style")
 
-                if !statusFolded && $scope.statusesFolded[status.id]
-                    $(".status-#{status.id}").css({
-                        'width': 40,
-                        'min-width': 40
-                    })
-
-
-            columnWidths = _.map $scope.taskStatusList, (status) ->
-                if $scope.statusesFolded[status.id]
-                    return columWidthFolded
-                else
-                    return columWidth
+            columns = $el.find(".task-colum-name")
+            columnWidths = _.map columns, (column) ->
+                return $(column).outerWidth(true)
 
             totalWidth = _.reduce columnWidths, (total, width) ->
                 return total + width
 
-            #$el.find('.taskboard-table-inner').css("width", totalWidth + columWidth)
-            $el.find('.taskboard-table-inner').css("width", 2000)
+            $el.find('.taskboard-table-inner').css("width", totalWidth)
+            return
 
     return {link: link}
 

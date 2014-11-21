@@ -330,7 +330,6 @@ TaskboardSquishColumnDirective = (rs) ->
                     tasks = $scope.usTasks[us.id][status.id].length
 
                     if $scope.statusesFolded[status.id] && tasks
-                        statusFolded = true
                         tasksMatrixSize = Math.round(Math.sqrt(tasks))
                         width = avatarWidth * tasksMatrixSize
 

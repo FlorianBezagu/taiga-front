@@ -303,12 +303,12 @@ TaskboardSquishColumnDirective = (rs) ->
             $scope.statusesFolded = rs.tasks.getStatusColumnModes($scope.project.id)
             $scope.usFolded = rs.tasks.getUsRowModes($scope.project.id)
 
-            updateTableWidth()
+            updateTaskboardWidth()
 
         $scope.foldStatus = (status) ->
             $scope.statusesFolded[status.id] = !!!$scope.statusesFolded[status.id]
             rs.tasks.storeStatusColumnModes($scope.projectId, $scope.statusesFolded)
-            updateTableWidth()
+            updateTaskboardWidth()
 
         $scope.foldUs = (us) ->
             if !us
@@ -317,28 +317,31 @@ TaskboardSquishColumnDirective = (rs) ->
                 $scope.usFolded[us.id] = !!!$scope.usFolded[us.id]
 
             rs.tasks.storeUsRowModes($scope.projectId, $scope.usFolded)
-            updateTableWidth()
+            updateTaskboardWidth()
 
-        updateTableWidth = ->
+        updateTaskboardWidth = ->
+            avatarWidth = 40
             columnWidths = []
 
             _.forEach $scope.taskStatusList, (status) ->
-                statusFolded = false
+                statusFoldedWidth = 0
 
                 _.forEach $scope.userstories, (us) ->
                     tasks = $scope.usTasks[us.id][status.id].length
 
-                    if $scope.statusesFolded[status.id] && tasks > 1
+                    if $scope.statusesFolded[status.id] && tasks
                         statusFolded = true
                         tasksMatrixSize = Math.round(Math.sqrt(tasks))
-                        width = 40 * tasksMatrixSize
+                        width = avatarWidth * tasksMatrixSize
 
-                        $el.find(".status-#{status.id}").css({
-                            'max-width': width
-                        })
+                        statusFoldedWidth = width if width > statusFoldedWidth
 
-                if !statusFolded
-                    $el.find(".status-#{status.id}").removeAttr("style")
+                if statusFoldedWidth
+                    $el.find(".squish-status-#{status.id}").css({
+                        'max-width': statusFoldedWidth
+                    })
+                else
+                    $el.find(".squish-status-#{status.id}").removeAttr("style")
 
             columns = $el.find(".task-colum-name")
             columnWidths = _.map columns, (column) ->
@@ -361,7 +364,7 @@ module.directive("tgTaskboardSquishColumn", ["$tgResources", TaskboardSquishColu
 TaskboardUserDirective = ($log) ->
     template = _.template("""
     <figure class="avatar">
-        <a href="#" title="Assign task" <% if (!clickable) {%>class="not-clickable"<% } %>>
+       <a href="#" title="Assign task" <% if (!clickable) {%>class="not-clickable"<% } %>>
             <img src="<%- imgurl %>" alt="<%- name %>">
         </a>
     </figure>
@@ -410,7 +413,10 @@ TaskboardUserDirective = ($log) ->
                     $ctrl = $el.controller()
                     $ctrl.editTaskAssignedTo(us)
 
-    return {link: link, require:"ngModel"}
+    return {
+        link: link,
+        require:"ngModel"
+    }
 
 
 module.directive("tgTaskboardUserAvatar", ["$log", TaskboardUserDirective])

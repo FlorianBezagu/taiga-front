@@ -329,9 +329,12 @@ TaskboardSquishColumnDirective = (rs) ->
                 _.forEach $scope.userstories, (us) ->
                     tasks = $scope.usTasks[us.id][status.id].length
 
-                    if $scope.statusesFolded[status.id] && tasks
-                        tasksMatrixSize = Math.round(Math.sqrt(tasks))
-                        width = avatarWidth * tasksMatrixSize
+                    if $scope.statusesFolded[status.id]
+                        if tasks
+                            tasksMatrixSize = Math.round(Math.sqrt(tasks))
+                            width = avatarWidth * tasksMatrixSize
+                        else
+                            width = avatarWidth
 
                         statusFoldedWidth = width if width > statusFoldedWidth
 

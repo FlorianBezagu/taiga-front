@@ -34,6 +34,12 @@ $column-margin: 0 10px 0 0;
         @include table-flex(flex-start);
         @include flex-direction(row);
     }
+    .avatar-task-link {
+        display: block;
+    }
+    .avatar-assigned-to {
+        display: none;
+    }
 }
 
 .taskboard-table {
@@ -188,6 +194,12 @@ $column-margin: 0 10px 0 0;
                 right: inherit;
             }
         }
+    }
+    .avatar-task-link {
+        display: none;
+    }
+    .avatar-assigned-to {
+        display: block;
     }
 }
 
